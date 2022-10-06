@@ -1,5 +1,5 @@
 import { useDispatch } from "react-redux"
-import { reactionAdded } from "../postsSlice"
+import { reactionAdded } from "./postsSlice"
 
 // Set emojis for object lookup
 const emojiReaction = {

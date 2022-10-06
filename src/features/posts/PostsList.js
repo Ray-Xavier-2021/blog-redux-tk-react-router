@@ -5,7 +5,7 @@ import {
   getPostsStatus, 
   getPostsError, 
   fetchPosts
-} from "../postsSlice"
+} from "./postsSlice"
 import PostFeed from "./PostFeed"
 
 const PostsList = () => {
