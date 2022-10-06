@@ -14,16 +14,45 @@ const initialState = {
     error: null
 }
 
-// Create a fetch/ read posts asyncThunk function that gets a post
+// Create a post / CREATE asyncThunk function that adds a post
+export const addNewPost = createAsyncThunk('posts/addNewPost', async (initialPost) => {
+    const response = await axios.post(POSTS_URL, initialPost)
+    return response.data
+})
+
+// Create a get / READ asyncThunk function that fetches a post
 export const fetchPosts = createAsyncThunk('posts/fetchPosts', async () => {
     const response = await axios.get(POSTS_URL)
     return response.data
 })
 
-// Create a post/ create post asyncThunk function that adds a post
-export const addNewPost = createAsyncThunk('posts/addNewPost0', async (initialPost) => {
-    const response = await axios.post(POSTS_URL, initialPost)
-    return response.data
+// Create a put / UPDATE asyncThunk function that updates a post
+export const updatePost = createAsyncThunk('posts/updatePost', async (initialPost) => {
+    try {
+        const { id } = initialPost
+        const response = await axios.put(`${POSTS_URL}/${id}`, initialPost)
+        // Return response data
+        return response.data
+    } catch (err) {
+        // Return error message
+        // return err.message
+        // Only for testing redux
+        return initialPost
+    }
+})
+
+// Create a delete / DELETE asyncThunk function that deletes a post
+export const deletePost = createAsyncThunk('posts/deletePost', async (initialPost) => {
+    const { id } = initialPost;
+    try {
+        const response = await axios.delete(`${POSTS_URL}/${id}`, initialPost)
+        // Check if response is 200
+        if (response?.status === 200) return initialPost;
+        return `${response?.status}: ${response?.statusText}`
+    } catch (err) {
+        // Return error message
+        return err.message
+    }
 })
 
 const postsSlice = createSlice({
@@ -119,6 +148,27 @@ const postsSlice = createSlice({
                 }
                 console.log(action.payload)
                 state.posts.push(action.payload)
+            })
+            .addCase(updatePost.fulfilled, (state, action) => {
+                if (!action.payload?.id) {
+                    console.log('Update could not complete')
+                    console.log(action.payload)
+                    return;
+                }
+                const { id } = action.payload;
+                action.payload.date = new Date().toISOString();
+                const posts = state.posts.filter(post => post.id !== id);
+                state.posts = [...posts, action.payload];
+            })
+            .addCase(deletePost.fulfilled, (state, action) => {
+                if (!action.payload?.id) {
+                    console.log('Delete could not complete')
+                    console.log(action.payload)
+                    return;
+                }
+                const { id } = action.payload;
+                const posts = state.posts.filter(post => post.id !== id);
+                state.posts = posts;
             })
     }
 })
